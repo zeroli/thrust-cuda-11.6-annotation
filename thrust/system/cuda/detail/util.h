@@ -44,6 +44,7 @@ inline __host__ __device__
 cudaStream_t
 default_stream()
 {
+  // THRUST只能拿到per-thread default stream
 #ifdef CUDA_API_PER_THREAD_DEFAULT_STREAM
   return cudaStreamPerThread;
 #else
@@ -57,6 +58,7 @@ __host__ __device__
 cudaStream_t
 get_stream(execution_policy<Derived> &)
 {
+  // 注意，THRUST只能拿到per-thread default stream
   return default_stream();
 }
 

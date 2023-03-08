@@ -67,7 +67,10 @@ __host__ __device__
 {
   using thrust::system::detail::generic::select_system;
 
-  return thrust::copy(select_system(thrust::detail::derived_cast(thrust::detail::strip_const(system1)), thrust::detail::derived_cast(thrust::detail::strip_const(system2))), first, last, result);
+  // 这个版本的copy是带有1个execution policies参数的版本，需要两个系统都存在
+  return thrust::copy(select_system(thrust::detail::derived_cast(thrust::detail::strip_const(system1)),
+                                      thrust::detail::derived_cast(thrust::detail::strip_const(system2))),
+                      first, last, result);
 } // end two_system_copy()
 
 
@@ -86,7 +89,8 @@ __host__ __device__
 {
   using thrust::system::detail::generic::select_system;
 
-  return thrust::copy_n(select_system(thrust::detail::derived_cast(thrust::detail::strip_const(system1)), thrust::detail::derived_cast(thrust::detail::strip_const(system2))), first, n, result);
+  return thrust::copy_n(select_system(thrust::detail::derived_cast(thrust::detail::strip_const(system1)),
+                thrust::detail::derived_cast(thrust::detail::strip_const(system2))), first, n, result);
 } // end two_system_copy_n()
 
 

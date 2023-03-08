@@ -73,7 +73,7 @@ namespace cuda_cub {
       template<class T, class P>
       OutputType THRUST_DEVICE_FUNCTION
       operator()(T const &x, P const& y)
-      {
+      {  // 评估另外一个值，譬如stencil
         return pred(y) ? new_value : x;
       }
     }; // struct new_value_if_f

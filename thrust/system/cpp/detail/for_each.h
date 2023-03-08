@@ -18,6 +18,6 @@
 
 #include <thrust/detail/config.h>
 
+// OK, cpp基本实现就是采用sequential模式
 // this system inherits for_each
 #include <thrust/system/detail/sequential/for_each.h>
-

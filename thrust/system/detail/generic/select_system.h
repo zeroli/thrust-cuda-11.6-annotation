@@ -50,6 +50,7 @@ template<typename Tag1, typename Tag2, typename Tag3, typename Tag4, typename Ta
 template<typename Tag1, typename Tag2, typename Tag3, typename Tag4, typename Tag5, typename Tag6>
   struct select_system6_exists;
 
+// 这里是声明，定义在对应文件的*.inl中
 template<typename System>
 __host__ __device__
   typename thrust::detail::disable_if<

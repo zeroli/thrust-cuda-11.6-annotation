@@ -84,11 +84,13 @@ namespace __transform {
     template<class Size>
     void THRUST_DEVICE_FUNCTION operator()(Size idx)
     {
+      // 对应的stencil评估为true，则对输入进行转换操作赋值给输出
       if (pred(raw_reference_cast(stencil[idx])))
         output[idx] = op(raw_reference_cast(input[idx]));
     }
   }; // struct unary_transform_stencil_f
 
+// 模板特化类，没有stencil
   template <class InputIt,
             class OutputIt,
             class TransformOp,
@@ -115,6 +117,7 @@ namespace __transform {
     template<class Size>
     void THRUST_DEVICE_FUNCTION operator()(Size idx)
     {
+      // 没有stencil，直接对输入进行评估
       if (pred(raw_reference_cast(input[idx])))
         output[idx] = op(raw_reference_cast(input[idx]));
     }

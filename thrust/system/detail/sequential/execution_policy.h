@@ -64,7 +64,8 @@ template<typename Derived>
   }
 };
 
-
+// 客户端直接用这个预定义的`seq`来选择调用API，
+// 那么最后将采用sequential模式的copy重载函数
 THRUST_INLINE_CONSTANT tag seq;
 
 
@@ -72,4 +73,3 @@ THRUST_INLINE_CONSTANT tag seq;
 } // end detail
 } // end system
 THRUST_NAMESPACE_END
-

@@ -28,6 +28,7 @@ namespace detail
 {
 
 
+// 这里用的是system::tbb::detail::execution_policy
 template<typename DerivedPolicy,
          typename InputIterator,
          typename OutputIterator>
@@ -53,4 +54,3 @@ OutputIterator copy_n(execution_policy<DerivedPolicy> &exec,
 THRUST_NAMESPACE_END
 
 #include <thrust/system/tbb/detail/copy.inl>
-

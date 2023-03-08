@@ -77,6 +77,7 @@ typename thrust::detail::enable_if<
 } // end select_system_detail
 
 
+// `disable_if`代表条件不成立时，定义并返回后一个模板参数
 template<typename System>
 __host__ __device__
   typename thrust::detail::disable_if<
@@ -175,4 +176,3 @@ thrust::device_system_tag select_system(thrust::any_system_tag)
 } // end detail
 } // end system
 THRUST_NAMESPACE_END
-

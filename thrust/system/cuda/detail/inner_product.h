@@ -61,6 +61,7 @@ inner_product(execution_policy<Derived> &policy,
                                               ProductOp>
       binop_iterator_t;
 
+  // inner product属于map/reduce操作
   return cuda_cub::reduce_n(policy,
                             binop_iterator_t(first1, first2, product_op),
                             num_items,
@@ -84,8 +85,8 @@ inner_product(execution_policy<Derived> &policy,
                                  last1,
                                  first2,
                                  init,
-                                 plus<T>(),
-                                 multiplies<T>());
+                                 plus<T>(),  // 后加
+                                 multiplies<T>());  // 先乘
 }
 
 }    // namespace cuda_cub

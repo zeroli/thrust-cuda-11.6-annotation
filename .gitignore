@@ -1,4 +1,5 @@
 *.log
+.vscode/
 .p4config
 doc/html
 discrete_voronoi.pgm

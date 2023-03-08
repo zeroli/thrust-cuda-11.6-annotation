@@ -20,6 +20,7 @@
 #include <thrust/iterator/iterator_traits.h>
 #include <thrust/distance.h>
 #include <thrust/system/detail/sequential/execution_policy.h>
+// 这里引入tbb开发包
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
 
@@ -45,6 +46,7 @@ template<typename RandomAccessIterator,
     : m_first(first), m_f(f)
   {}
 
+  // 一个线程只work在一个range内
   void operator()(const ::tbb::blocked_range<Size> &r) const
   {
     // we assume that blocked_range specifies a contiguous range of integers
@@ -73,11 +75,13 @@ RandomAccessIterator for_each_n(execution_policy<DerivedPolicy> &,
                                 Size n,
                                 UnaryFunction f)
 {
+  // 这里调用了tbb的API
+  // 提供forloop的范围，和函数对象
   ::tbb::parallel_for(::tbb::blocked_range<Size>(0,n), for_each_detail::make_body<Size>(first,f));
 
   // return the end of the range
   return first + n;
-} // end for_each_n 
+} // end for_each_n
 
 
 template<typename DerivedPolicy,
@@ -96,4 +100,3 @@ template<typename DerivedPolicy,
 } // end namespace tbb
 } // end namespace system
 THRUST_NAMESPACE_END
-

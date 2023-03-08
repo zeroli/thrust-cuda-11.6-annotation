@@ -35,7 +35,7 @@ THRUST_NAMESPACE_BEGIN
 namespace cuda_cub {
 
 // in-place
-  
+
 template <class Derived,
           class InputIt,
           class StencilIt,
@@ -60,6 +60,7 @@ remove_if(execution_policy<Derived> &policy,
           InputIt                    last,
           Predicate                  predicate)
 {
+  // 不match的元素拷贝到目标区域，inplace拷贝
   return cuda_cub::copy_if(policy, first, last, first,
     thrust::detail::not1(predicate));
 }
@@ -74,6 +75,8 @@ remove(execution_policy<Derived> &policy,
        InputIt                    last,
        const T &                  value)
 {
+  // TODO: 研究下为啥要用placeholders
+  // placeholders是如何实现lambda表示的功能的
   using thrust::placeholders::_1;
 
   return cuda_cub::remove_if(policy, first, last, _1 == value);

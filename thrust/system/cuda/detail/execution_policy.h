@@ -47,15 +47,18 @@ namespace cuda_cub
 
 struct tag;
 
+// 主模板，只声明，未定义
 template <class>
 struct execution_policy;
 
+// 模板特化，基于tag，一个特别的policy，system有关
 template <>
 struct execution_policy<tag> : thrust::execution_policy<tag>
 {
   typedef tag tag_type;
 };
 
+// 定义这个system平台特别的policy tag
 struct tag : execution_policy<tag>
 , thrust::detail::allocator_aware_execution_policy<cuda_cub::execution_policy>
 #if THRUST_CPP_DIALECT >= 2011
@@ -63,10 +66,11 @@ struct tag : execution_policy<tag>
 #endif
 {};
 
+// 模板类通用实现，支持用户继承定义
 template <class Derived>
 struct execution_policy : thrust::execution_policy<Derived>
 {
-  typedef tag tag_type; 
+  typedef tag tag_type;
   operator tag() const { return tag(); }
 };
 
@@ -97,4 +101,3 @@ using thrust::cuda_cub::execution_policy;
 } // namespace cuda
 
 THRUST_NAMESPACE_END
-

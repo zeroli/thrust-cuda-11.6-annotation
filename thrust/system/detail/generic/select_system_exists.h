@@ -65,7 +65,8 @@ namespace select_system_exists_ns
     struct select_system1_exists
   {
     static Tag &tag;
-
+    // 怎么所有的类型都会进行自动转换，然后返回`no`
+    // 这样value就始终为false了
     static const bool value = sizeof(check(select_system(tag))) == sizeof(yes);
   };
 
@@ -164,4 +165,3 @@ template<typename Tag1, typename Tag2, typename Tag3, typename Tag4, typename Ta
 } // end detail
 } // end system
 THRUST_NAMESPACE_END
-

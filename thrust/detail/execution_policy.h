@@ -68,6 +68,7 @@ const DerivedPolicy &derived_cast(const execution_policy_base<DerivedPolicy> &x)
 
 } // end detail
 
+// CRTP模式
 template<typename DerivedPolicy>
   struct execution_policy
     : thrust::detail::execution_policy_base<DerivedPolicy>
