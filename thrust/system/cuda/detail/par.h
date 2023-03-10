@@ -62,6 +62,8 @@ public:
   }
 
 private:
+  // 有了这个友元函数，就可以通过用户的execute policy获取cudaStream_t
+  // 特化模板函数get_stream，定义在util.h中
   friend __host__ __device__
   cudaStream_t
   get_stream(const execute_on_stream_base &exec)
@@ -100,10 +102,12 @@ struct par_t : execution_policy<par_t>,
   stream_attachment_type
   on(cudaStream_t const &stream) const
   {
+    // 返回的是一个临时对象，包装cudaStream
     return execute_on_stream(stream);
   }
 };
 
+// 全局的paralle policy，可以引用，线程安全的
 THRUST_INLINE_CONSTANT par_t par;
 }    // namespace cuda_
 
@@ -121,4 +125,3 @@ using thrust::cuda_cub::par;
 } // namespace cuda
 
 THRUST_NAMESPACE_END
-

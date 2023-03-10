@@ -57,6 +57,7 @@ namespace core {
   __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
       _kernel_agent(Args... args)
   {
+    // 有shared memory的版本
     extern __shared__ char shmem[];
     Agent::entry(args..., shmem);
   }
@@ -171,13 +172,15 @@ namespace core {
   ////////////////////////////////////////////////////////////
 
 
-#if 0
+#if 0  // 如果kernel定义支持variadic template parameter语法
   template <class Agent, class... Args>
   void __global__
   __launch_bounds__(Agent::ptx_plan::BLOCK_THREADS)
       _kernel_agent_vshmem(char* vshmem, Args... args)
   {
     extern __shared__ char shmem[];
+    // 虚拟shared memory版本，外界传入的可以是全局memory，但是是buffer的开头
+    // 这里shift到当前block对应的buffer开始位置
     vshmem = vshmem == NULL ? shmem : vshmem + blockIdx.x * temp_storage_size<typename Agent::ptx_plan>::value;
     Agent::entry(args..., vshmem);
   }
@@ -303,7 +306,7 @@ namespace core {
     Agent::entry(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xA, xB, xC, xD, xE, vshmem);
   }
 #endif
-#else
+#else  // !__CUDA_ARCH__ && !__NVCOMPILER_CUDA__
 #if 0
   template <class , class... Args >
   void __global__  _kernel_agent(Args... args) {}
@@ -710,7 +713,7 @@ namespace core {
 
 
 
-#if 0
+#if 0  // 如果kernel启动函数支持template variadic argument，开启这个功能
 
     // If we are guaranteed to have enough shared memory
     // don't compile other kernel which accepts pointer
@@ -720,6 +723,7 @@ namespace core {
     launch_impl(thrust::detail::true_type, Args... args) const
     {
       assert(has_shmem && vshmem == NULL);
+      // _kernel_agent是模板函数，实例化为一个kernel函数指针
       print_info(_kernel_agent<Agent, Args...>);
       launcher::triple_chevron(grid, plan.block_threads, shmem_size, stream)
           .doit(_kernel_agent<Agent, Args...>, args...);
@@ -757,6 +761,8 @@ namespace core {
         shm1::v5>::t tt;
 #endif
 #endif
+    // 启动kernel，然后同步
+    // `args`参数中包含启动配置选项和kernel function
       launch_impl(has_enough_shmem_t(),args...);
       sync();
     }

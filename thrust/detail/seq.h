@@ -33,6 +33,7 @@ struct seq_t : thrust::system::detail::sequential::execution_policy<seq_t>,
   constexpr seq_t() : thrust::system::detail::sequential::execution_policy<seq_t>() {}
 
   // allow any execution_policy to convert to seq_t
+  // 定义参数，但并没有使用
   template<typename DerivedPolicy>
   __host__ __device__
   seq_t(const thrust::execution_policy<DerivedPolicy> &)
@@ -44,9 +45,8 @@ struct seq_t : thrust::system::detail::sequential::execution_policy<seq_t>,
 } // end detail
 
 
+// 全局的seqential policy
 THRUST_INLINE_CONSTANT detail::seq_t seq;
 
 
 THRUST_NAMESPACE_END
-
-

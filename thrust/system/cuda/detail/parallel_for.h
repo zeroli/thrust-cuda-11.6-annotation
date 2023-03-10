@@ -43,6 +43,10 @@ namespace cuda_cub {
 
 namespace __parallel_for {
 
+  // 并行线程执行(PTX)的policy
+  // 描述block线程个数，每个线程处理的数据量
+  // 两者的乘积就是每个block处理的数据量
+  // 因此只需要描述前两者，编译期确定
   template <int _BLOCK_THREADS,
             int _ITEMS_PER_THREAD = 1>
   struct PtxPolicy
@@ -55,9 +59,14 @@ namespace __parallel_for {
     };
   };    // struct PtxPolicy
 
+// 每一个并行算法都需要定义这样的Tuning类
+// 针对不同的GPU架构描述不同的kernel启动配置选项
+// 这里定义的是所有可以真正并行处理算法的Tuning类
+// transform/copy/fill/... 都会调用这个parallel_for版本
   template <class Arch, class F>
   struct Tuning;
 
+// 针对sm30的配置
   template <class F>
   struct Tuning<sm30, F>
   {
@@ -65,6 +74,8 @@ namespace __parallel_for {
   };
 
 
+// AgentLauncher仅仅是一个启动启
+// 在kernel线程中，真正干活的还是这个Agent的entry device函数
   template <class F,
             class Size>
   struct ParallelForAgent
@@ -89,15 +100,22 @@ namespace __parallel_for {
                  Size tile_base,
                  int  items_in_tile)
     {
+     // T1 T2 T3 ... Tm | T1 T2 T3 ... Tm | ...
+     // d1 d2 d2 ... dm  | d1+m d2+m ... dm+m | ...
+     // 一个block里面的线程并行处理tile中连续m个数据(d1, d2, d3, ... dm)
+     // 然后m个线程同时移到下一个连续m个数据进行处理
+     // ITEM代表当前第几个数据区域，BLOCK_THREADS * ITEM
+     // Size idx = BLOCK_THREADS * ITEM + threadIdx.x; => 当前线程处理的tile中的第几个数据
 #pragma unroll
       for (int ITEM = 0; ITEM < ITEMS_PER_THREAD; ++ITEM)
       {
         Size idx = BLOCK_THREADS * ITEM + threadIdx.x;
-        if (IS_FULL_TILE || idx < items_in_tile)
-          f(tile_base + idx);
+        if (IS_FULL_TILE || idx < items_in_tile)  // 在tile数据范围之内？？
+          f(tile_base + idx); // tile_base + idx => 就是全局的数据索引
       }
     }
 
+  // !!!!! kernel entry函数 !!!!!
     THRUST_AGENT_ENTRY(F     f,
                        Size  num_items,
                        char * /*shmem*/ )
@@ -107,6 +125,9 @@ namespace __parallel_for {
       Size items_in_tile = static_cast<Size>(
           num_remaining < ITEMS_PER_TILE ? num_remaining : ITEMS_PER_TILE);
 
+      // 当前block处理全部的tile？
+      // 一个tile是一个block需要处理的用户数据量
+      // 每个数据需要应用客户端代码传入的functor函数
       if (items_in_tile == ITEMS_PER_TILE)
       {
         // full tile
@@ -120,6 +141,9 @@ namespace __parallel_for {
     }
   };    // struct ParallelForEagent
 
+  // cuda并行运算执行的引擎，入口
+  // parallel_for，tbb也有对应的接口
+  // 接受一个任务大小和执行任务的函数，以及一个在哪执行的cudaStream(queue)
   template <class F,
             class Size>
   THRUST_RUNTIME_FUNCTION cudaError_t
@@ -137,7 +161,9 @@ namespace __parallel_for {
     typedef AgentLauncher<ParallelForAgent<F, Size> > parallel_for_agent;
     AgentPlan parallel_for_plan = parallel_for_agent::get_plan(stream);
 
+  // 注意这里的kernel名字定义为"transform::agent"
     parallel_for_agent pfa(parallel_for_plan, num_items, stream, "transform::agent", debug_sync);
+    // `f`其实是定义个kernel函数
     pfa.launch(f, num_items);
     CUDA_CUB_RET_IF_FAIL(cudaPeekAtLastError());
 

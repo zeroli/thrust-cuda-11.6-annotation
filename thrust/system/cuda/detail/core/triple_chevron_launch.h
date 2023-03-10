@@ -55,7 +55,7 @@ namespace launcher {
           shared_mem(shared_mem_),
           stream(stream_) {}
 
-#if 0
+#if 0  // host上启动kernel，variadic template parameter支持
     template<class K, class... Args>
     cudaError_t __host__
     doit_host(K k, Args const&... args) const
@@ -819,6 +819,7 @@ namespace launcher {
     cudaError_t __device__
     launch_device(K k, void* buffer) const
     {
+      // device上启动kernel，支持dynamic parallelism
 #if __THRUST_HAS_CUDART__
       return cudaLaunchDevice((void*)k,
                               buffer,
